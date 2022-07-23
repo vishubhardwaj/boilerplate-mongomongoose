@@ -1,32 +1,72 @@
 require('dotenv').config();
+const mongoose = require('mongoose');
+const mySecret = process.env['MONGO_URI']
+mongoose.connect(mySecret, { useNewUrlParser: true, useUnifiedTopology: true });
 
-
-let Person;
+// let Person;
+const personSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  age: Number,
+  favoriteFoods: [String],
+});
+const Person = mongoose.model("Person", personSchema);
+console.log(Person);
 
 const createAndSavePerson = (done) => {
-  done(null /*, data*/);
+  function saveData(done){
+    const person = new Person({
+      name:'Vishu',
+      age:28,
+      favoriteFoods:['pani puri', 'naan', 'pav bhaji']
+    });
+    person.save(function(err, data){
+      if (err) return console.log(err);
+      done(null, data);
+    });
+  }
+  saveData(done);
 };
 
 const createManyPeople = (arrayOfPeople, done) => {
-  done(null /*, data*/);
+  Person.create(arrayOfPeople, function(err, data){
+    if (err) return console.log(err);
+    done(null, data);
+  })
 };
 
 const findPeopleByName = (personName, done) => {
-  done(null /*, data*/);
+  Person.find({name : personName}, function(err, data){
+    if(err)return console.log(err);
+    done(null, data);
+  });
 };
 
 const findOneByFood = (food, done) => {
-  done(null /*, data*/);
+  Person.findOne({favoriteFoods:food}, function(err, data){
+    if(err) return console.log(err);
+    done(null, data);
+  })
+  
 };
 
 const findPersonById = (personId, done) => {
-  done(null /*, data*/);
+  Person.findById({_id:personId},function(err, data){
+    if(err) return console.log(err);
+    done(null, data);
+  })
 };
 
 const findEditThenSave = (personId, done) => {
   const foodToAdd = "hamburger";
-
-  done(null /*, data*/);
+  Person.findById({ _id: personId }, function (err, data) {
+    if (err) return console.log(err);
+  }).then(function (doc) {
+    doc.favoriteFoods.push(foodToAdd);
+    doc.save(function (err, data) {
+      if (err) return console.log(err);
+      done(null, data);
+    });
+  });
 };
 
 const findAndUpdate = (personName, done) => {
